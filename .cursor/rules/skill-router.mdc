@@ -1,0 +1,17 @@
+---
+description: Skill router — pick one primary skill (+ optional helper) per task; prevent skill/rule mixing.
+alwaysApply: true
+---
+
+# Skill Router (always on)
+
+Before acting on a user request that involves coding, design, debugging, review, docs, planning, or skills/plugins:
+
+1. Read the `skill-router` skill (`SKILL.md` + `registry.md`) from the installed skill path or this repository.
+2. Classify into one registry **lane**.
+3. Use **at most one primary** and **at most one helper** from that row.
+4. Do **not** apply other skills or broad rule packs this turn unless the user named them.
+5. Keep heavy domain rules (minimal-code, design systems, multi-language packs) off unless the lane selects them.
+6. If editing files, only apply language/framework rules for that stack.
+
+User override wins: named skill, `stop router`, or `بدون موجّه`.
