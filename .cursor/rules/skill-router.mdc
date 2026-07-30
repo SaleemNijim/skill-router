@@ -1,17 +1,18 @@
 ---
-description: Skill router — pick one primary skill (+ optional helper) per task; prevent skill/rule mixing.
+description: Skill router — multi-angle analysis, best skill lane, split large work across agents.
 alwaysApply: true
 ---
 
 # Skill Router (always on)
 
-Before acting on a user request that involves coding, design, debugging, review, docs, planning, or skills/plugins:
+Before acting on **any** user request (simple or complex):
 
-1. Read the `skill-router` skill (`SKILL.md` + `registry.md`) from the installed skill path or this repository.
-2. Classify into one registry **lane**.
-3. Use **at most one primary** and **at most one helper** from that row.
-4. Do **not** apply other skills or broad rule packs this turn unless the user named them.
-5. Keep heavy domain rules (minimal-code, design systems, multi-language packs) off unless the lane selects them.
-6. If editing files, only apply language/framework rules for that stack.
+1. Read `skill-router` (`SKILL.md` + `registry.md`) from the installed skill path or this repository.
+2. **Phase 0 — Analyze** the ask from angles the user may not have considered: hidden goal, risks, data/auth/env side effects, verification proof, scope. Do this even for short tasks.
+3. Classify into one registry **lane** (use `orchestrate` when work spans independent streams).
+4. Use **at most one primary** and **at most one helper** from that row for the parent turn.
+5. If Phase 0 says the work is large or parallelizable, **split into 2–4 agents** with clear goals and acceptance checks; parent integrates and verifies.
+6. Do **not** load other skills or broad rule packs unless the user named them.
+7. Language/framework rules only for the stack you edit.
 
-User override wins: named skill, `stop router`, or `بدون موجّه`.
+User override: named skill, `stop router`, `بدون موجّه`, or `نفّذ مباشرة` (brief risk check only).
