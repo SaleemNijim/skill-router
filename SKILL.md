@@ -9,7 +9,7 @@ license: MIT
 compatibility: Cursor, Claude Code, Antigravity, Codex, Gemini CLI, OpenCode, Copilot
 metadata:
   author: SaleemNijim
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # Skill Router
@@ -71,6 +71,58 @@ Split into **2–4 parallel agents** when **any** of these is true:
 ### Phase 3 — Execute under the lane
 
 Complete the work. Verify against Phase 0 success proof before claiming done.
+
+## Examples
+
+### 1 — RLS bug
+```
+Request: "عندي bug في الـ RLS policy"
+→ Phase 0: tenant isolation / anon vs service role / which table; proof = failing query then passing query
+→ Lane: debug
+→ Primary: systematic-debugging
+→ Helper: karpathy-guidelines
+→ Split: no — one failing policy path
+```
+
+### 2 — Arabic landing page
+```
+Request: "صمّملي صفحة هبوط"
+→ Phase 0: brand-first hero, RTL, one CTA; proof = desktop+mobile screenshot
+→ Lane: design-ui
+→ Primary: frontend-design
+→ Helper: ponytail
+→ Split: no (unless copy research is separate)
+```
+
+### 3 — Multi-app migrate
+```
+Request: "Migrate Supabase and update delivery + admin + driver"
+→ Phase 0: data ownership, env keys, rollback; proof = catalogs load on each app
+→ Lane: orchestrate
+→ Primary: Phase 2 split (db / each app / verify)
+→ Helper: handoff if context is long
+→ Split: yes — 2–4 agents with "do not touch" boundaries
+```
+
+### 4 — Override
+```
+Request: "نفّذ مباشرة: زِد الـ timeout إلى 30s"
+→ Phase 0: one-line risk (timeouts hide hung deps) — skip grilling
+→ Lane: implement (direct)
+→ Primary: none / stack only
+→ Helper: —
+→ Split: no
+```
+
+### 5 — False-positive trap
+```
+Request: "fix the CSS bug on the homepage hero"
+→ Phase 0: broken layout vs redesign ask; proof = repro then fixed screenshot
+→ Lane: debug (NOT design-ui)
+→ Primary: systematic-debugging
+→ Helper: karpathy-guidelines
+→ Split: no
+```
 
 ## Caps
 

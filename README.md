@@ -2,13 +2,18 @@
 
 **Think first. Pick one skill. Split when the work is big.**
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Agent Skills](https://img.shields.io/badge/Agent%20Skills-SKILL.md-black)](https://agentskills.io)
+[![Routing suite](https://img.shields.io/badge/routing%20suite-20%20cases-success)](tests/routing-cases.md)
+[![Composite](https://img.shields.io/badge/composite-95%25-brightgreen)](metrics.md)
+
 Skill Router is a portable Agent Skill for coding agents. On every request — simple or complex — it:
 
 1. **Analyzes** the ask from angles you may not have considered (hidden goals, risks, verification)
 2. **Routes** to at most **one primary** skill + **one optional helper**
 3. **Splits** large / parallel work across **2–4 agents**, then integrates and verifies
 
-Built for **Cursor**, **Claude Code**, **Google Antigravity**, **Codex**, **Gemini CLI**, **OpenCode**, and any tool that follows the [Agent Skills](https://agentskills.io) / `SKILL.md` standard.
+Built for **Cursor**, **Claude Code**, **Google Antigravity**, **Codex**, **Gemini CLI**, **OpenCode**, **GitHub Copilot**, and any tool that follows the [Agent Skills](https://agentskills.io) / `SKILL.md` standard.
 
 > Arabic triggers work too: `توجيه`, `هل فهمتني`, `بدون موجّه`, `نفّذ مباشرة`, `قسّم`.
 
@@ -17,6 +22,8 @@ Built for **Cursor**, **Claude Code**, **Google Antigravity**, **Codex**, **Gemi
 When many skills and rules are installed, agents mix them: design packs fight minimal-code packs, five language rules load for a one-file fix, and “simple” tasks skip thinking.
 
 Skill Router is the traffic controller: **analyze → route → (orchestrate) → execute**.
+
+Measured on a fixed 20-case suite: see [`metrics.md`](metrics.md) and [`tests/routing-cases.md`](tests/routing-cases.md).
 
 ## Quick install
 
@@ -79,34 +86,35 @@ Turn **off** `alwaysApply` on heavy domain rules (e.g. global minimal-code). Let
 | Skill | `~/.claude/skills/skill-router/` | `.claude/skills/skill-router/` |
 | Always-on rule | `~/.claude/rules/skill-router.md` | `.claude/rules/skill-router.md` |
 
-Use the file in [`adapters/claude/skill-router.md`](adapters/claude/skill-router.md).
+Use [`adapters/claude/skill-router.md`](adapters/claude/skill-router.md).
 
-Plugin-style install also works if you mirror this repo into a Claude marketplace plugin later; the skill body is the same `SKILL.md`.
-
-### Google Antigravity (and Gemini surfaces)
+### Google Antigravity
 
 | Scope | Path |
 |-------|------|
 | Project | `<workspace>/.agents/skills/skill-router/` |
-| Global (best cross-surface default) | `~/.gemini/config/skills/skill-router/` |
+| Global | `~/.gemini/config/skills/skill-router/` |
 
 Details: [`adapters/antigravity/README.md`](adapters/antigravity/README.md).
 
-Copy `SKILL.md` + `registry.md` into that folder. Prefer real directories (not broken symlinks). Absolute custom skill paths are more reliable than `~` in some Antigravity IDE builds.
-
 ### OpenAI Codex
 
-1. Install the skill into a path Codex discovers (often via `npx skills add … -g`, or project `.agents/skills/`).
-2. Paste the short block from [`adapters/codex/AGENTS.snippet.md`](adapters/codex/AGENTS.snippet.md) into project `AGENTS.md` (or your global Codex instructions) so Phase 0 stays always-on.
+1. Install the skill (`npx skills add … -g` or project `.agents/skills/`).
+2. Paste [`adapters/codex/AGENTS.snippet.md`](adapters/codex/AGENTS.snippet.md) into `AGENTS.md`.
 
-### Gemini CLI / OpenCode / Copilot / others
+### Gemini CLI
 
-If the tool supports Agent Skills:
+- Skill paths + always-on: [`adapters/gemini-cli/skill-router.md`](adapters/gemini-cli/skill-router.md)
+- Prefer `~/.gemini/config/skills/skill-router/` for global discovery
 
-1. Put `SKILL.md` + `registry.md` in that tool’s skills directory (commonly `~/.agents/skills/skill-router/` or `<project>/.agents/skills/skill-router/`).
-2. Add a one-line always-on instruction: *“Follow skill-router before every task.”*
+### OpenCode
 
-Same skill file — different discovery folders.
+- Always-on + paths: [`adapters/opencode/skill-router.md`](adapters/opencode/skill-router.md)
+
+### GitHub Copilot
+
+- Instructions file: [`adapters/copilot/skill-router.instructions.md`](adapters/copilot/skill-router.instructions.md) → typically `.github/instructions/`
+- Skill body still lives as `SKILL.md` + `registry.md` under your Copilot skills / `.agents/skills/` path
 
 ---
 
@@ -133,8 +141,40 @@ User request
 | `meta-skills` | Authoring skills/rules |
 | `general` | Q&A — load nothing |
 
-Full mapping, conflict pairs, overrides: [registry.md](registry.md).  
-Full agent instructions: [SKILL.md](SKILL.md).
+Full mapping, **negative triggers**, conflict pairs: [registry.md](registry.md).  
+Agent instructions + examples: [SKILL.md](SKILL.md).
+
+## Real output
+
+Example user ask: **«صمّملي dashboard»**
+
+```text
+تحليل: لوحة تحكم تحتاج هيكل معلومات + UI؛ غالباً بيانات وهمية أولاً
+مخاطر: تجاهل RTL / تكديس كروت بدون مهمة واضحة لكل قسم
+تحقق: screenshot لـ desktop + mobile بعد ما الـ mock data تظهر
+
+Lane: design-ui
+Primary: frontend-design
+Helper: ponytail
+Split: نعم — أجنت UI · أجنت mock data (حد أقصى 2 هنا)
+```
+
+Override example: **«نفّذ مباشرة: زِد الـ timeout إلى 30s»** → short risk line only, no grilling, no split.
+
+## Comparison
+
+Honest overlap — different tools solve different layers. Pick what matches your stack.
+
+| Feature | SaleemNijim/skill-router | [erichare/skill-route](https://github.com/erichare/skill-route) | [hussi9/skill-router](https://github.com/hussi9/skill-router) |
+|---------|--------------------------|------------------------------------------------------------------|----------------------------------------------------------------|
+| Approach | Instruction skill + registry lanes | Semantic catalog / MCP / SQLite | Claude Code triage + model/thinking chain |
+| Arabic triggers | ✅ first-class | ❌ | ❌ |
+| Multi-harness adapters | ✅ Cursor, Claude, Antigravity, Codex, Gemini CLI, OpenCode, Copilot | ✅ many MCP clients | ❌ Claude-first (Codex draft) |
+| Agent splitting | ✅ Phase 2 / `orchestrate` | ❌ (ranking, not split execution) | ✅ multi-domain chains |
+| Negative triggers | ✅ `Must NOT trigger on` | via evals/metadata | pattern tables in skill |
+| Published test suite | ✅ 20 cases + [metrics](metrics.md) | golden-route evals in tooling | ✅ 20-prompt harness (~90% path) |
+| Install weight | Copy markdown / `npx skills` | Python + optional UI/MCP | curl one `SKILL.md` |
+| Best when | You want bilingual, portable always-on discipline | You need searchable routing over huge skill libraries | You live in Claude Code and want model/chain announcements |
 
 ## Customize
 
@@ -161,14 +201,21 @@ Not required. Wire them in your registry if you use them:
 
 ```text
 .
-├── SKILL.md                         # portable Agent Skill (repo root for npx skills)
-├── registry.md                      # lane → skill map
-├── .cursor/rules/skill-router.mdc   # Cursor always-on
+├── SKILL.md                         # portable Agent Skill
+├── registry.md                      # lanes + negative triggers
+├── tests/routing-cases.md           # 20 routing cases
+├── metrics.md                       # scores + how to run
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── .cursor/rules/skill-router.mdc
 ├── adapters/
-│   ├── claude/skill-router.md       # Claude Code rule
-│   ├── antigravity/README.md        # Antigravity paths
-│   └── codex/AGENTS.snippet.md      # Codex / AGENTS.md snippet
-├── install.sh / install.ps1         # multi-harness installers
+│   ├── claude/
+│   ├── antigravity/
+│   ├── codex/
+│   ├── gemini-cli/
+│   ├── opencode/
+│   └── copilot/
+├── install.sh / install.ps1
 ├── README.md
 └── LICENSE
 ```
@@ -178,6 +225,12 @@ Not required. Wire them in your registry if you use them:
 Ask the agent: “Design a landing page” or “Migrate this DB and update three apps.”
 
 You should see: short analysis (when non-trivial) → one lane → at most two skills → optional agent split → verification before “done”.
+
+Or run the suite in [`tests/routing-cases.md`](tests/routing-cases.md) and compare to [`metrics.md`](metrics.md).
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). PRs that add English triggers must include Arabic counterparts.
 
 ## License
 
